@@ -1,9 +1,8 @@
 import React, {createContext, useState, useEffect} from 'react';
 import AsyncStorage from '@react-native-community/async-storage';
-import {View, ActivityIndicator, KeyboardAvoidingView} from 'react-native';
 import * as auth from '../services/auth';
 
-const AuthContext = createContext({signed: true});
+const AuthContext = createContext({signed: true, loading: true});
 
 export const AuthProvider = ({children}) => {
   const [user, setUser] = useState(null);
@@ -13,8 +12,6 @@ export const AuthProvider = ({children}) => {
     async function loadStoragedData() {
       const storagedUser = await AsyncStorage.getItem('@RNAuth:user');
       const storagedToken = await AsyncStorage.getItem('@RNAuth:token');
-
-      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       if (storagedUser && storagedToken) {
         setUser(JSON.parse(storagedUser));
@@ -38,16 +35,9 @@ export const AuthProvider = ({children}) => {
     });
   }
 
-  if (loading) {
-    return (
-      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-        <ActivityIndicator size="large" color="#666" />
-      </View>
-    );
-  }
-
   return (
-    <AuthContext.Provider value={{signed: !!user, user, signIn, signOut}}>
+    <AuthContext.Provider
+      value={{signed: !!user, user, loading, signIn, signOut}}>
       {children}
     </AuthContext.Provider>
   );
